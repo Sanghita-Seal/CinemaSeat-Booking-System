@@ -6,11 +6,15 @@
 // INSERT INTO seats (isbooked)
 // SELECT 0 FROM generate_series(1, 20);
 
+import "dotenv/config";
 import express from "express";
 import pg from "pg";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
+import authRoutes from "./src/modules/auth/auth.routes.js";
+import cookieParser from "cookie-parser";
+import { authenticate } from "./src/modules/auth/auth.middleware.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -32,7 +36,12 @@ const pool = new pg.Pool({
 });
 
 const app = new express();
+
+app.use(express.json());
+app.use(cookieParser());
 app.use(cors());
+
+app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
@@ -45,42 +54,39 @@ app.get("/seats", async (req, res) => {
 
 //book a seat give the seatId and your name
 
-app.put("/:id/:name", async (req, res) => {
+app.put("/seats/:id", authenticate, async (req, res) => {
   try {
     const id = req.params.id;
-    const name = req.params.name;
-    // payment integration should be here
-    // verify payment
-    const conn = await pool.connect(); // pick a connection from the pool
-    //begin transaction
-    // KEEP THE TRANSACTION AS SMALL AS POSSIBLE
+    const name = req.user.name;
+
+    const conn = await pool.connect();
     await conn.query("BEGIN");
-    //getting the row to make sure it is not booked
-    /// $1 is a variable which we are passing in the array as the second parameter of query function,
-    // Why do we use $1? -> this is to avoid SQL INJECTION
-    // (If you do ${id} directly in the query string,
-    // then it can be manipulated by the user to execute malicious SQL code)
-    const sql = "SELECT * FROM seats where id = $1 and isbooked = 0 FOR UPDATE";
+
+    const sql =
+      "SELECT * FROM seats where id = $1 and isbooked = 0 FOR UPDATE";
     const result = await conn.query(sql, [id]);
 
-    //if no rows found then the operation should fail can't book
-    // This shows we Do not have the current seat available for booking
     if (result.rowCount === 0) {
-      res.send({ error: "Seat already booked" });
-      return;
+      await conn.query("ROLLBACK");
+      conn.release();
+      return res.status(400).json({ error: "Seat already booked" });
     }
-    //if we get the row, we are safe to update
-    const sqlU = "update seats set isbooked = 1, name = $2 where id = $1";
-    const updateResult = await conn.query(sqlU, [id, name]); // Again to avoid SQL INJECTION we are using $1 and $2 as placeholders
 
-    //end transaction by committing
+    const sqlU =
+      "update seats set isbooked = 1, name = $2 where id = $1";
+    const updateResult = await conn.query(sqlU, [id, name]);
+
     await conn.query("COMMIT");
-    conn.release(); // release the connection back to the pool (so we do not keep the connection open unnecessarily)
-    res.send(updateResult);
+    conn.release();
+
+    res.json({ message: "Seat booked successfully", data: updateResult });
   } catch (ex) {
     console.log(ex);
-    res.send(500);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
+app.post("/reset-seats", async (req, res) => {
+  await pool.query("UPDATE seats SET isbooked = 0, name = NULL");
+  res.json({ message: "All seats reset" });
+});
 app.listen(port, () => console.log("Server starting on port: " + port));
