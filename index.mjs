@@ -19,7 +19,8 @@ import pool from "./src/common/config/db.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const port = process.env.PORT || 8080;
+const port = process.env.PORT;
+
 
 // Equivalent to mongoose connection
 // Pool is nothing but group of connections
@@ -83,4 +84,6 @@ app.post("/reset-seats", async (req, res) => {
   await pool.query("UPDATE seats SET isbooked = 0, name = NULL");
   res.json({ message: "All seats reset" });
 });
-app.listen(port, () => console.log("Server starting on port: " + port));
+app.listen(port, "0.0.0.0", () => {
+  console.log("Server starting on port: " + port);
+});
