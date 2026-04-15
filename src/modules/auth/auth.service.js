@@ -8,14 +8,8 @@ import {
   generateResetToken,
 } from "../../common/utils/jwt.utils.js";
 
-// same DB config as index.mjs
-const pool = new pg.Pool({
-  host: "localhost",
-  port: 5433,
-  user: "postgres",
-  password: "postgres",
-  database: "sql_class_2_db",
-});
+import  pool from "../../common/config/db.js";
+
 
 const hashToken = (token) =>
   crypto.createHash("sha256").update(token).digest("hex");

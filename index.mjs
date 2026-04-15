@@ -15,6 +15,7 @@ import cors from "cors";
 import authRoutes from "./src/modules/auth/auth.routes.js";
 import cookieParser from "cookie-parser";
 import { authenticate } from "./src/modules/auth/auth.middleware.js";
+import pool from "./src/common/config/db.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
