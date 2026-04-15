@@ -69,9 +69,9 @@ const login = async ({ email, password }) => {
     throw ApiError.unauthorized("Invalid email or password");
   }
 
-  if (!user.is_verified) {
-    throw ApiError.forbidden("Please verify your email");
-  }
+  // if (!user.is_verified) {
+  //   throw ApiError.forbidden("Please verify your email");
+  // }
 
   const accessToken = generateAccessToken({ id: user.id, role: user.role });
   const refreshToken = generateRefreshToken({ id: user.id });

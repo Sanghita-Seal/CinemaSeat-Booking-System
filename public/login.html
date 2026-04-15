@@ -1,0 +1,153 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - ChaiCode Cinema</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
+
+    body {
+      font-family: "Outfit", sans-serif;
+      background: radial-gradient(circle at top, #020617, #020617 40%, #020617);
+      color: #f8fafc;
+    }
+
+    .input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      color: black;
+      outline: none;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+  </style>
+
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+  <div class="w-full max-w-md bg-white/5 backdrop-blur-2xl rounded-3xl p-8 border border-white/10">
+
+ 
+<!-- TITLE -->
+<div class="text-center mb-6">
+  <h1 class="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 text-transparent bg-clip-text">
+    ChaiCode Cinema
+  </h1>
+  <p class="text-slate-400 mt-2">Welcome back 👋</p>
+</div>
+
+<!-- FORM -->
+<div class="space-y-4">
+
+  <input id="email" placeholder="Email" class="input"/>
+  <input id="password" type="password" placeholder="Password" class="input"/>
+
+  <button id="loginBtn" onclick="login()" 
+    class="btn bg-cyan-500 hover:bg-cyan-400">
+    Login
+  </button>
+
+  <p id="errorMsg" class="text-red-400 text-sm hidden"></p>
+
+</div>
+
+<!-- SIGNUP LINK -->
+<div class="text-center mt-6">
+  <p class="text-slate-400">
+    Don't have an account?
+    <a href="/signup.html" class="text-emerald-400 hover:underline">Sign Up</a>
+  </p>
+</div>
+ 
+
+  </div>
+
+<script>
+// 🚀 If already logged in → go to booking page
+const existingToken = localStorage.getItem("token");
+
+if (existingToken) {
+  fetch("/api/auth/me", {
+    headers: {
+      Authorization: "Bearer " + existingToken
+    }
+  })
+  .then(res => {
+    if (res.ok) {
+      window.location.href = "/";
+    } else {
+      localStorage.removeItem("token");
+    }
+  })
+  .catch(() => {
+    localStorage.removeItem("token");
+  });
+}
+
+async function login() {
+  const btn = document.getElementById("loginBtn");
+  const errorBox = document.getElementById("errorMsg");
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  errorBox.classList.add("hidden");
+
+  if (!email || !password) {
+    return showError("All fields are required");
+  }
+
+  try {
+    btn.innerText = "Logging in...";
+    btn.disabled = true;
+
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return showError(data.message || "Invalid credentials");
+    }
+
+    // ✅ store token
+    localStorage.setItem("token", data.data.accessToken);
+
+    // redirect to booking page
+    window.location.href = "/";
+
+  } catch (err) {
+    showError("Something went wrong");
+  } finally {
+    btn.innerText = "Login";
+    btn.disabled = false;
+  }
+}
+
+function showError(msg) {
+  const errorBox = document.getElementById("errorMsg");
+  errorBox.innerText = msg;
+  errorBox.classList.remove("hidden");
+}
+</script>
+
+</body>
+</html>

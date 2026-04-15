@@ -1,0 +1,139 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up - ChaiCode Cinema</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
+
+    body {
+      font-family: "Outfit", sans-serif;
+      background: radial-gradient(circle at top, #020617, #020617 40%, #020617);
+      color: #f8fafc;
+    }
+
+    .input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      color: black;
+      outline: none;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+  </style>
+
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+  <div class="w-full max-w-md bg-white/5 backdrop-blur-2xl rounded-3xl p-8 border border-white/10">
+
+ 
+<!-- TITLE -->
+<div class="text-center mb-6">
+  <h1 class="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 text-transparent bg-clip-text">
+    ChaiCode Cinema
+  </h1>
+  <p class="text-slate-400 mt-2">Create your account</p>
+</div>
+
+<!-- FORM -->
+<div class="space-y-4">
+
+  <input id="name" placeholder="Full Name" class="input"/>
+  <input id="email" placeholder="Email" class="input"/>
+  <input id="password" type="password" placeholder="Password" class="input"/>
+
+  <button id="signupBtn" onclick="signup()" 
+    class="btn bg-emerald-500 hover:bg-emerald-400">
+    Sign Up
+  </button>
+
+  <p id="errorMsg" class="text-red-400 text-sm hidden"></p>
+
+</div>
+
+<!-- LOGIN LINK -->
+<div class="text-center mt-6">
+  <p class="text-slate-400">
+    Already have an account?
+    <a href="/login.html" class="text-cyan-400 hover:underline">Login</a>
+  </p>
+</div>
+ 
+
+  </div>
+
+<script>
+async function signup() {
+  const btn = document.getElementById("signupBtn");
+  const errorBox = document.getElementById("errorMsg");
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  // reset error
+  errorBox.classList.add("hidden");
+  errorBox.innerText = "";
+
+  // validation
+  if (!name || !email || !password) {
+    return showError("All fields are required");
+  }
+
+  if (password.length < 8) {
+    return showError("Password must be at least 8 characters");
+  }
+
+  try {
+    btn.innerText = "Creating account...";
+    btn.disabled = true;
+
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name, email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return showError(data.message || "Signup failed");
+    }
+
+    // success
+    alert("Signup successful! Please login.");
+    window.location.href = "/login.html";
+
+  } catch (err) {
+    showError("Something went wrong. Try again.");
+  } finally {
+    btn.innerText = "Sign Up";
+    btn.disabled = false;
+  }
+}
+
+function showError(msg) {
+  const errorBox = document.getElementById("errorMsg");
+  errorBox.innerText = msg;
+  errorBox.classList.remove("hidden");
+}
+</script>
+
+</body>
+</html>

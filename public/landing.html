@@ -1,0 +1,59 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ChaiCode Cinema</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      background: radial-gradient(circle at top, #020617);
+      color: white;
+      font-family: sans-serif;
+    }
+  </style>
+
+</head>
+
+<body class="flex items-center justify-center min-h-screen">
+
+  <div class="text-center space-y-6">
+
+```
+<h1 class="text-5xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 text-transparent bg-clip-text">
+  ChaiCode Cinema 🎬
+</h1>
+
+<p class="text-slate-400">
+  Book your seats in seconds
+</p>
+
+<div class="space-x-4 mt-6">
+
+  <a href="/login.html"
+    class="bg-cyan-500 px-6 py-3 rounded-xl font-bold hover:bg-cyan-400">
+    Login
+  </a>
+
+  <a href="/signup.html"
+    class="bg-emerald-500 px-6 py-3 rounded-xl font-bold hover:bg-emerald-400">
+    Sign Up
+  </a>
+
+</div>
+```
+
+  </div>
+
+<script>
+// 🔥 If already logged in → go to booking page
+const token = localStorage.getItem("token");
+
+if (token) {
+  window.location.href = "/";
+}
+</script>
+
+</body>
+</html>

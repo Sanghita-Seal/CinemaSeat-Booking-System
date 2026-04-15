@@ -13,7 +13,7 @@ const register = async (req, res) => {
   } catch (err) {
     throw err instanceof ApiError
       ? err
-      : ApiError.internal(err.message);
+          : ApiError.badRequest(err.message);
   }
 };
 
@@ -35,7 +35,7 @@ const login = async (req, res) => {
   } catch (err) {
     throw err instanceof ApiError
       ? err
-      : ApiError.internal(err.message);
+      : ApiError.badRequest(err.message);
   }
 };
 
@@ -48,7 +48,7 @@ const refreshToken = async (req, res) => {
   } catch (err) {
     throw err instanceof ApiError
       ? err
-      : ApiError.internal(err.message);
+      : ApiError.badRequest(err.message);
   }
 };
 
@@ -61,7 +61,7 @@ const logout = async (req, res) => {
   } catch (err) {
     throw err instanceof ApiError
       ? err
-      : ApiError.internal(err.message);
+      : ApiError.badRequest(err.message);
   }
 };
 
@@ -73,7 +73,7 @@ const verifyEmail = async (req, res) => {
   } catch (err) {
     throw err instanceof ApiError
       ? err
-      : ApiError.internal(err.message);
+      : ApiError.badRequest(err.message);
   }
 };
 
@@ -85,7 +85,7 @@ const forgotPassword = async (req, res) => {
   } catch (err) {
     throw err instanceof ApiError
       ? err
-      : ApiError.internal(err.message);
+      : ApiError.badRequest(err.message);
   }
 };
 
@@ -97,7 +97,7 @@ const resetPassword = async (req, res) => {
   } catch (err) {
     throw err instanceof ApiError
       ? err
-      : ApiError.internal(err.message);
+      : ApiError.badRequest(err.message);
   }
 };
 
@@ -109,7 +109,7 @@ const getMe = async (req, res) => {
   } catch (err) {
     throw err instanceof ApiError
       ? err
-      : ApiError.internal(err.message);
+      : ApiError.badRequest(err.message);
   }
 };
 

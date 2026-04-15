@@ -43,9 +43,9 @@ app.use(cors());
 
 app.use("/api/auth", authRoutes);
 
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
-});
+
+app.use(express.static("public"));
+
 //get all seats
 app.get("/seats", async (req, res) => {
   const result = await pool.query("select * from seats"); // equivalent to Seats.find() in mongoose
