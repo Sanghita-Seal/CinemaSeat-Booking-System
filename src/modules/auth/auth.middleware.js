@@ -1,14 +1,10 @@
 import ApiError from "../../common/utils/api-error.js";
 import { verifyAccessToken } from "../../common/utils/jwt.utils.js";
 import pg from "pg";
+import  pool from "../../common/config/db.js";
 
-const pool = new pg.Pool({
-  host: "localhost",
-  port: 5433,
-  user: "postgres",
-  password: "postgres",
-  database: "sql_class_2_db",
-});
+
+
 
 const authenticate = async (req, res, next) => {
   try {

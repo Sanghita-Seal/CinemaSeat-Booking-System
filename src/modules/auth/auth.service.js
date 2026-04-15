@@ -1,5 +1,4 @@
 import crypto from "crypto";
-import pg from "pg";
 import ApiError from "../../common/utils/api-error.js";
 import {
   generateAccessToken,
@@ -8,8 +7,7 @@ import {
   generateResetToken,
 } from "../../common/utils/jwt.utils.js";
 
-import  pool from "../../common/config/db.js";
-
+import pool from "../../common/config/db.js";
 
 const hashToken = (token) =>
   crypto.createHash("sha256").update(token).digest("hex");
@@ -25,25 +23,21 @@ const register = async ({ name, email, password, role }) => {
     throw ApiError.conflict("Email already registered");
   }
 
-  const { rawToken, hashedToken } = generateResetToken();
-
   const result = await pool.query(
     `INSERT INTO users 
-    (id, first_name, email, password, role, verification_token)
-    VALUES (gen_random_uuid(), $1, $2, $3, $4, $5)
+    (id, first_name, email, password, role)
+    VALUES (gen_random_uuid(), $1, $2, $3, $4)
     RETURNING *`,
-    [name, email, password, role || "customer", hashedToken]
+    [name, email, password, role || "customer"]
   );
 
   const user = result.rows[0];
 
   delete user.password;
-  delete user.verification_token;
-
-  console.log("Verification token:", rawToken); // simulate email
 
   return user;
 };
+
 
 
 const login = async ({ email, password }) => {
@@ -59,10 +53,6 @@ const login = async ({ email, password }) => {
   if (user.password !== password) {
     throw ApiError.unauthorized("Invalid email or password");
   }
-
-  // if (!user.is_verified) {
-  //   throw ApiError.forbidden("Please verify your email");
-  // }
 
   const accessToken = generateAccessToken({ id: user.id, role: user.role });
   const refreshToken = generateRefreshToken({ id: user.id });
@@ -108,29 +98,6 @@ const logout = async (userId) => {
     "UPDATE users SET refresh_token = NULL WHERE id = $1",
     [userId]
   );
-};
-
-
-const verifyEmail = async (token) => {
-  const hashed = hashToken(token);
-
-  const result = await pool.query(
-    "SELECT * FROM users WHERE verification_token = $1",
-    [hashed]
-  );
-
-  const user = result.rows[0];
-
-  if (!user) throw ApiError.badRequest("Invalid token");
-
-  await pool.query(
-    `UPDATE users 
-     SET is_verified = true, verification_token = NULL 
-     WHERE id = $1`,
-    [user.id]
-  );
-
-  return user;
 };
 
 
@@ -197,12 +164,12 @@ const getMe = async (userId) => {
   return user;
 };
 
+
 export {
   register,
   login,
   refresh,
   logout,
-  verifyEmail,
   forgotPassword,
   resetPassword,
   getMe,
