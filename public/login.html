@@ -76,7 +76,7 @@
   </div>
 
 <script>
-// 🚀 If already logged in → go to booking page
+//  If already logged in → go to booking page
 const existingToken = localStorage.getItem("token");
 
 if (existingToken) {
@@ -128,7 +128,7 @@ async function login() {
       return showError(data.message || "Invalid credentials");
     }
 
-    // ✅ store token
+    //  store token
     localStorage.setItem("token", data.data.accessToken);
 
     // redirect to booking page

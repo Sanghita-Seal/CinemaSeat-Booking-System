@@ -30,7 +30,6 @@
   </head>
 
   <body class="min-h-screen flex items-start justify-center p-6">
-    <!-- 🔥 GLOBAL LOGOUT -->
 
     <div class="fixed top-6 right-6 z-50">
       <button
@@ -102,7 +101,7 @@
     </div>
 
     <script>
-      // 🔐 VALIDATE TOKEN (single source of truth)
+      //  VALIDATE TOKEN 
       async function validateToken() {
         const token = localStorage.getItem("token");
 
@@ -127,7 +126,7 @@
         }
       }
 
-      // 🔥 LOGOUT
+      // LOGOUT
       async function logout() {
         const token = localStorage.getItem("token");
 
@@ -148,7 +147,7 @@
         window.location.replace("/login.html");
       }
 
-      // 🚀 MAIN APP
+      //  MAIN APP
       async function run() {
         const token = await validateToken();
         if (!token) return;

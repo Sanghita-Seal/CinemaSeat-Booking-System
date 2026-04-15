@@ -21,7 +21,6 @@ const hashToken = (token) =>
   crypto.createHash("sha256").update(token).digest("hex");
 
 
-// 🔐 REGISTER
 const register = async ({ name, email, password, role }) => {
   const existing = await pool.query(
     "SELECT * FROM users WHERE email = $1",
@@ -53,7 +52,6 @@ const register = async ({ name, email, password, role }) => {
 };
 
 
-// 🔐 LOGIN
 const login = async ({ email, password }) => {
   const result = await pool.query(
     "SELECT * FROM users WHERE email = $1",
@@ -64,7 +62,6 @@ const login = async ({ email, password }) => {
 
   if (!user) throw ApiError.unauthorized("Invalid email or password");
 
-  // ⚠️ plain compare for now (later hash)
   if (user.password !== password) {
     throw ApiError.unauthorized("Invalid email or password");
   }
@@ -88,7 +85,6 @@ const login = async ({ email, password }) => {
 };
 
 
-// 🔄 REFRESH TOKEN
 const refresh = async (token) => {
   if (!token) throw ApiError.unauthorized("Refresh token missing");
 
@@ -113,7 +109,6 @@ const refresh = async (token) => {
 };
 
 
-// 🚪 LOGOUT
 const logout = async (userId) => {
   await pool.query(
     "UPDATE users SET refresh_token = NULL WHERE id = $1",
@@ -122,7 +117,6 @@ const logout = async (userId) => {
 };
 
 
-// 📩 VERIFY EMAIL
 const verifyEmail = async (token) => {
   const hashed = hashToken(token);
 
@@ -146,7 +140,6 @@ const verifyEmail = async (token) => {
 };
 
 
-// 🔁 FORGOT PASSWORD
 const forgotPassword = async (email) => {
   const result = await pool.query(
     "SELECT * FROM users WHERE email = $1",
@@ -171,7 +164,6 @@ const forgotPassword = async (email) => {
 };
 
 
-// 🔁 RESET PASSWORD
 const resetPassword = async (token, newPassword) => {
   const hashed = hashToken(token);
 
@@ -197,7 +189,6 @@ const resetPassword = async (token, newPassword) => {
 };
 
 
-// 👤 GET ME
 const getMe = async (userId) => {
   const result = await pool.query(
     "SELECT * FROM users WHERE id = $1",

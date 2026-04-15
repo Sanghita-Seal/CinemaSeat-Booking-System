@@ -10,7 +10,6 @@ const pool = new pg.Pool({
   database: "sql_class_2_db",
 });
 
-// 🔐 AUTHENTICATE USER
 const authenticate = async (req, res, next) => {
   try {
     let token;
@@ -43,11 +42,10 @@ console.log("TOKEN:", token);
 
     next();
   } catch (err) {
-    next(err); // IMPORTANT → passes to global error handler
+    next(err); // IMP. passes to global error handler
   }
 };
 
-// 🔒 AUTHORIZE (ROLE BASED)
 const authorize = (...roles) => {
     
   return (req, res, next) => {
