@@ -1,239 +1,249 @@
 <!doctype html>
 
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Stellar Seat Booking</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stellar Seat Booking</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-  <style>
-    @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
 
-    body {
-      font-family: "Outfit", sans-serif;
-      background: radial-gradient(circle at top, #020617);
-      color: #f8fafc;
-    }
-
-    .selected-seat {
-      background: linear-gradient(135deg, #facc15, #f97316);
-      color: black;
-      transform: scale(1.1);
-      box-shadow: 0 0 20px rgba(250, 204, 21, 0.8);
-    }
-  </style>
-
-</head>
-
-<body class="min-h-screen flex items-start justify-center p-6">
-
-  <!-- 🔥 GLOBAL LOGOUT -->
-
-  <div class="fixed top-6 right-6 z-50">
-    <button onclick="logout()" 
-      class="bg-red-500 px-4 py-2 rounded-lg font-bold hover:bg-red-400 shadow-lg">
-      Logout
-    </button>
-  </div>
-
-  <div class="max-w-7xl w-full bg-white/5 backdrop-blur-2xl rounded-3xl p-10 border border-white/10">
-
-```
-<!-- TITLE -->
-<div class="text-center mb-8">
-  <h1 class="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 text-transparent bg-clip-text">
-    ChaiCode Cinema
-  </h1>
-  <p class="text-slate-400 mt-2">Dhurandhar The Revenge</p>
-</div>
-
-<!-- SCREEN -->
-<div class="flex justify-center mb-10">
-  <div class="w-2/3 h-6 bg-gradient-to-r from-white/10 to-white/30 rounded-full text-center text-xs">
-    SCREEN
-  </div>
-</div>
-
-<div class="flex gap-10">
-
-  <!-- SEATS -->
-  <div class="flex-1 flex justify-center">
-    <div class="bg-white/5 p-8 rounded-2xl border border-white/10">
-      <table id="tbl" class="border-separate border-spacing-3"></table>
-    </div>
-  </div>
-
-  <!-- SUMMARY -->
-  <div class="w-80">
-    <div class="sticky top-10 bg-white/5 p-6 rounded-xl border border-white/10 space-y-6">
-
-      <div>
-        <p class="text-slate-400">Selected Seats:</p>
-        <p id="selectedSeats" class="text-lg font-bold text-white">None</p>
-      </div>
-
-      <div>
-        <p class="text-slate-400">Total Price:</p>
-        <p id="totalPrice" class="text-lg font-bold text-emerald-400">₹0</p>
-      </div>
-
-      <button id="bookBtn"
-        class="w-full bg-emerald-500 px-6 py-3 rounded-xl font-bold hover:bg-emerald-400 transition">
-        Book Now
-      </button>
-
-    </div>
-  </div>
-
-</div>
-```
-
-  </div>
-
-<script>
-
-// 🔐 VALIDATE TOKEN (single source of truth)
-async function validateToken() {
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    window.location.replace("/login.html");
-    return null;
-  }
-
-  try {
-    const res = await fetch("/api/auth/me", {
-      headers: {
-        Authorization: "Bearer " + token
+      body {
+        font-family: "Outfit", sans-serif;
+        background: radial-gradient(circle at top, #020617);
+        color: #f8fafc;
       }
-    });
+      td {
+        position: relative;
+      }
 
-    if (!res.ok) throw new Error();
-    return token;
+      .selected-seat {
+        background: linear-gradient(135deg, #facc15, #f97316);
+        color: black;
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(250, 204, 21, 0.8);
+      }
+    </style>
+  </head>
 
-  } catch {
-    localStorage.removeItem("token");
-    window.location.replace("/login.html");
-    return null;
-  }
-}
+  <body class="min-h-screen flex items-start justify-center p-6">
+    <!-- 🔥 GLOBAL LOGOUT -->
 
-// 🔥 LOGOUT
-async function logout() {
-  const token = localStorage.getItem("token");
+    <div class="fixed top-6 right-6 z-50">
+      <button
+        onclick="logout()"
+        class="bg-red-500 px-4 py-2 rounded-lg font-bold hover:bg-red-400 shadow-lg"
+      >
+        Logout
+      </button>
+    </div>
 
-  try {
-    if (token) {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer " + token
-        }
-      });
-    }
-  } catch {
-    console.log("Logout API failed");
-  }
+    <div
+      class="max-w-7xl w-full bg-white/5 backdrop-blur-2xl rounded-3xl p-10 border border-white/10"
+    >
+      <!-- TITLE -->
+      <div class="text-center mb-8">
+        <h1
+          class="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 text-transparent bg-clip-text"
+        >
+          BookMySeat
+        </h1>
+        <p class="text-slate-400 mt-2">Dhurandhar The Revenge</p>
+      </div>
 
-  localStorage.removeItem("token");
-  window.location.replace("/login.html");
-}
-
-// 🚀 MAIN APP
-async function run() {
-  const token = await validateToken();
-  if (!token) return;
-
-  const tbl = document.getElementById("tbl");
-
-  const res = await fetch("/seats");
-  const seats = await res.json();
-
-  seats.sort((a, b) => a.id - b.id);
-
-  let selected = [];
-  const pricePerSeat = 200;
-
-  let tr;
-  let rowChar = "A".charCodeAt(0);
-
-  for (let i = 0; i < seats.length; i++) {
-
-    if (i % 8 === 0) {
-      tr = document.createElement("tr");
-
-      const label = document.createElement("td");
-      label.innerText = String.fromCharCode(rowChar++);
-      label.className = "text-slate-400 pr-4 font-bold";
-      tr.appendChild(label);
-    }
-
-    const td = document.createElement("td");
-
-    const base = "w-16 h-16 rounded-xl text-center font-bold transition group relative";
-
-    if (seats[i].isbooked) {
-      td.className = base + " bg-rose-500/20 text-rose-400";
-
-      td.innerHTML = `
-        ${seats[i].id}
-        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 
-        px-3 py-1 bg-black/80 text-xs rounded opacity-0 group-hover:opacity-100">
-        Booked by: ${seats[i].name}
+      <!-- SCREEN -->
+      <div class="flex justify-center mb-10">
+        <div
+          class="w-2/3 h-6 bg-gradient-to-r from-white/10 to-white/30 rounded-full text-center text-xs"
+        >
+          SCREEN
         </div>
-      `;
+      </div>
 
-    } else {
-      td.className = base + " bg-emerald-400 text-black hover:scale-110";
-      td.innerText = seats[i].id;
+      <div class="flex gap-10">
+        <!-- SEATS -->
+        <div class="flex-1 flex justify-center">
+          <div class="bg-white/5 p-8 rounded-2xl border border-white/10">
+            <table id="tbl" class="border-separate border-spacing-3"></table>
+          </div>
+        </div>
 
-      td.onclick = () => {
-        if (td.classList.contains("selected-seat")) {
-          td.classList.remove("selected-seat");
-          selected = selected.filter(s => s !== seats[i].id);
-        } else {
-          td.classList.add("selected-seat");
-          selected.push(seats[i].id);
+        <!-- SUMMARY -->
+        <div class="w-80">
+          <div
+            class="sticky top-10 bg-white/5 p-6 rounded-xl border border-white/10 space-y-6"
+          >
+            <div>
+              <p class="text-slate-400">Selected Seats:</p>
+              <p id="selectedSeats" class="text-lg font-bold text-white">
+                None
+              </p>
+            </div>
+
+            <div>
+              <p class="text-slate-400">Total Price:</p>
+              <p id="totalPrice" class="text-lg font-bold text-emerald-400">
+                ₹0
+              </p>
+            </div>
+
+            <button
+              id="bookBtn"
+              class="w-full bg-emerald-500 px-6 py-3 rounded-xl font-bold hover:bg-emerald-400 transition"
+            >
+              Book Now
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 🔐 VALIDATE TOKEN (single source of truth)
+      async function validateToken() {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          window.location.replace("/login.html");
+          return null;
         }
-        updateSummary();
-      };
-    }
 
-    tr.appendChild(td);
-    tbl.appendChild(tr);
-  }
+        try {
+          const res = await fetch("/api/auth/me", {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          });
 
-  function updateSummary() {
-    document.getElementById("selectedSeats").innerText =
-      selected.length ? selected.join(", ") : "None";
-
-    document.getElementById("totalPrice").innerText =
-      "₹" + selected.length * pricePerSeat;
-  }
-
-  document.getElementById("bookBtn").onclick = async () => {
-    if (!selected.length) return alert("Select seats first");
-
-    for (let id of selected) {
-      await fetch(`/seats/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: "Bearer " + token
+          if (!res.ok) throw new Error();
+          return token;
+        } catch {
+          localStorage.removeItem("token");
+          window.location.replace("/login.html");
+          return null;
         }
-      });
-    }
+      }
 
-    alert("Booking successful");
-    location.reload();
-  };
-}
+      // 🔥 LOGOUT
+      async function logout() {
+        const token = localStorage.getItem("token");
 
-// start app
-run();
+        try {
+          if (token) {
+            await fetch("/api/auth/logout", {
+              method: "POST",
+              headers: {
+                Authorization: "Bearer " + token,
+              },
+            });
+          }
+        } catch {
+          console.log("Logout API failed");
+        }
 
-</script>
+        localStorage.removeItem("token");
+        window.location.replace("/login.html");
+      }
 
-</body>
+      // 🚀 MAIN APP
+      async function run() {
+        const token = await validateToken();
+        if (!token) return;
+
+        const tbl = document.getElementById("tbl");
+
+        const res = await fetch("/seats");
+        const seats = await res.json();
+
+        seats.sort((a, b) => a.id - b.id);
+
+        let selected = [];
+        const pricePerSeat = 200;
+
+        let tr;
+        let rowChar = "A".charCodeAt(0);
+
+        for (let i = 0; i < seats.length; i++) {
+          if (i % 8 === 0) {
+            tr = document.createElement("tr");
+
+            const label = document.createElement("td");
+            label.innerText = String.fromCharCode(rowChar++);
+            label.className = "text-slate-400 pr-4 font-bold";
+            tr.appendChild(label);
+          }
+
+          const td = document.createElement("td");
+
+          const base =
+            "w-16 h-16 rounded-xl text-center font-bold transition group relative";
+
+          if (seats[i].isbooked) {
+            td.className = base + " bg-rose-500/20 text-rose-400";
+
+            td.innerHTML = `
+                <div class="relative group w-full h-full flex items-center justify-center">
+                  ${seats[i].id}
+
+                  <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 
+                    px-3 py-1 bg-black/80 text-xs rounded opacity-0 
+                    pointer-events-none transition-opacity duration-200 
+                    group-hover:opacity-100">
+                    Booked by: ${seats[i].name}
+                  </div>
+                </div>
+              `;
+          } else {
+            td.className = base + " bg-emerald-400 text-black hover:scale-110";
+            td.innerText = seats[i].id;
+
+            td.onclick = () => {
+              if (td.classList.contains("selected-seat")) {
+                td.classList.remove("selected-seat");
+                selected = selected.filter((s) => s !== seats[i].id);
+              } else {
+                td.classList.add("selected-seat");
+                selected.push(seats[i].id);
+              }
+              updateSummary();
+            };
+          }
+
+          tr.appendChild(td);
+          tbl.appendChild(tr);
+        }
+
+        function updateSummary() {
+          document.getElementById("selectedSeats").innerText = selected.length
+            ? selected.join(", ")
+            : "None";
+
+          document.getElementById("totalPrice").innerText =
+            "₹" + selected.length * pricePerSeat;
+        }
+
+        document.getElementById("bookBtn").onclick = async () => {
+          if (!selected.length) return alert("Select seats first");
+
+          for (let id of selected) {
+            await fetch(`/seats/${id}`, {
+              method: "PUT",
+              headers: {
+                Authorization: "Bearer " + token,
+              },
+            });
+          }
+
+          alert("Booking successful");
+          location.reload();
+        };
+      }
+
+      // start app
+      run();
+    </script>
+  </body>
 </html>

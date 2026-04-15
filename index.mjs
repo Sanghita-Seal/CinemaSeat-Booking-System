@@ -43,7 +43,9 @@ app.use(cors());
 
 app.use("/api/auth", authRoutes);
 
-
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/public/landing.html");
+});
 app.use(express.static("public"));
 
 //get all seats

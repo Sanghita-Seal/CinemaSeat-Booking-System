@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login - ChaiCode Cinema</title>
+  <title>Login -  BookMySeat</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -44,7 +44,7 @@
 <!-- TITLE -->
 <div class="text-center mb-6">
   <h1 class="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 text-transparent bg-clip-text">
-    ChaiCode Cinema
+     BookMySeat
   </h1>
   <p class="text-slate-400 mt-2">Welcome back 👋</p>
 </div>
@@ -87,7 +87,7 @@ if (existingToken) {
   })
   .then(res => {
     if (res.ok) {
-      window.location.href = "/";
+      window.location.href = "/index.html";
     } else {
       localStorage.removeItem("token");
     }
