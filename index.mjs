@@ -20,7 +20,7 @@ import pool from "./src/common/config/db.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const port = process.env.PORT;
-
+console.log("ENV PORT:", process.env.PORT);
 
 // Equivalent to mongoose connection
 // Pool is nothing but group of connections
